@@ -22,11 +22,14 @@ def operations():
         tensor = tensor.to(torch.accelerator.current_accelerator())
     else:
         print("Sem GPU :(")
-    print(f"Primeira linha: {tensor[0]}")
-    print(f"Primeira coluna: {tensor[:, 0]}")  # Me perdi nisso
-    print(f"ultima coluna: {tensor[..., -1]}")  # Me perdi nisso tbm
     tensor[:, 1] = 0
-    print(tensor)
+    tensor[2, :] = 2
+    tensor[1, 3] = 3
+
+    print(f"{tensor}")
+    print(f"Primeira linha: {tensor[0]}")
+    print(f"Primeira coluna: {tensor[:, 0]}")
+    print(f"ultima coluna: {tensor[..., -1]}")
 
     # Concatenar
     print(torch.cat([tensor, tensor, tensor], dim=1))
