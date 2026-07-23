@@ -1,28 +1,48 @@
 import random
 
+type Expressao = list[dict[int, bool]]
 
-def tres_sat(n_variaveis: int, n_clausulas: int) -> list[dict[int, bool]]:
-    x: dict[int, bool] = {}
-    clausulas: list[dict] = []
-    for i in range(n_variaveis):
-        x[i] = random.choice([True, False])
 
-    for i in range(n_clausulas):
-        trio_keys = sorted(random.sample(tuple(x.keys()), 3))
-        trio = [x[j] for j in trio_keys]
+def gerar_variaveis(n_variaveis: int) -> dict[int, bool]:
+    return {i: random.choice([True, False]) for i in range(n_variaveis)}
 
-        clausulas.append(dict(zip(trio_keys, trio)))
+
+def tres_sat_expressao(n_variaveis: int, n_clausulas: int) -> Expressao:
+    clausulas: Expressao = []
+
+    for _ in range(n_clausulas):
+        indice_trio = sorted(random.sample(range(n_variaveis), 3))
+        clausulas.append({i: random.choice([True, False]) for i in indice_trio})
 
     return clausulas
 
 
-if __name__ == "__main__":
-    tres_sat_lista = tres_sat(10, 10)
-    expressao = ") and (".join(
-        (
-            " or ".join(f"x{i}" if v else f"!x{i}" for i, v in clausula.items())
-            for clausula in tres_sat_lista
-        )
-    )
+def eval_tres_sat(variaveis: dict[int, bool], expressao: Expressao):
+    clausulas_analisadas = []
+    for clausula in expressao:
+        variaveis_analisadas = [
+            variaveis[i] if value else not variaveis[i] for i, value in clausula.items()
+        ]
+        clausulas_analisadas.append(any(variaveis_analisadas))
+    return all(clausulas_analisadas)
 
-    print(f"({expressao})")
+
+def print_expressao(expressao: Expressao):
+    clausulas_formatadas = []
+
+    for clausula in expressao:
+        literais = [f"x{i}" if v else f"!x{i}" for i, v in clausula.items()]
+
+        clausulas_formatadas.append(f"({' or '.join(literais)})")
+
+    expressao_str = " and ".join(clausulas_formatadas)
+    print(expressao_str)
+
+
+if __name__ == "__main__":
+    n_variaveis = 8
+    x = gerar_variaveis(n_variaveis)
+    tres_sat_lista = tres_sat_expressao(n_variaveis, 10)
+    print(x)
+    print_expressao(tres_sat_lista)
+    print(eval_tres_sat(x, tres_sat_lista))
