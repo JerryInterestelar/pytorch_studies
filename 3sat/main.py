@@ -1,4 +1,5 @@
 import random
+import pandas as pd
 
 type Expressao = list[dict[int, bool]]
 
@@ -17,7 +18,7 @@ def tres_sat_expressao(n_variaveis: int, n_clausulas: int) -> Expressao:
     return clausulas
 
 
-def eval_tres_sat(variaveis: dict[int, bool], expressao: Expressao):
+def eval_tres_sat(variaveis: dict[int, bool], expressao: Expressao) -> bool:
     clausulas_analisadas = []
     for clausula in expressao:
         variaveis_analisadas = [
@@ -27,7 +28,7 @@ def eval_tres_sat(variaveis: dict[int, bool], expressao: Expressao):
     return all(clausulas_analisadas)
 
 
-def print_expressao(expressao: Expressao):
+def print_expressao(expressao: Expressao) -> None:
     clausulas_formatadas = []
 
     for clausula in expressao:
@@ -39,10 +40,19 @@ def print_expressao(expressao: Expressao):
     print(expressao_str)
 
 
-if __name__ == "__main__":
-    n_variaveis = 8
-    x = gerar_variaveis(n_variaveis)
-    tres_sat_lista = tres_sat_expressao(n_variaveis, 10)
-    print(x)
+def gerar_dataset(n_variaveis: int, n_clausulas: int, nome_arquivo: str):
+    tres_sat_lista = tres_sat_expressao(n_variaveis, n_clausulas)
     print_expressao(tres_sat_lista)
-    print(eval_tres_sat(x, tres_sat_lista))
+    lines = []
+    for _ in range(1000):
+        x = gerar_variaveis(n_variaveis)
+        line = [1 if value else 0 for value in x.values()]
+        line.append(1 if eval_tres_sat(x, tres_sat_lista) else 0)
+        lines.append(line)
+    df = pd.DataFrame(lines)
+    print(df)
+    df.to_csv(nome_arquivo, index=False, header=False)
+
+
+if __name__ == "__main__":
+    gerar_dataset(8, 10, "tres_sat_dataset_8_10.csv")
