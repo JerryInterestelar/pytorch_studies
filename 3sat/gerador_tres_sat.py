@@ -51,7 +51,7 @@ def gerar_dataset(n_variaveis: int, n_clausulas: int, nome_arquivo: str):
         lines.append(line)
     df = pd.DataFrame(lines)
     print(df)
-    df.to_csv(nome_arquivo, index=False, header=False)
+    df.to_csv(nome_arquivo, index=False, header=True)
 
 
 if __name__ == "__main__":

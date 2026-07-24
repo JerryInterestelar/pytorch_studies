@@ -36,6 +36,21 @@ class CustomImageDataset(Dataset):
         return image, label
 
 
+def test2():
+    test_data = datasets.MNIST(
+        root="data",
+        train=False,
+        download=True,
+        transform=v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)]),
+    )
+    test_dataloader = DataLoader(test_data, 64, True)
+    test_features: torch.Tensor
+    test_labels: torch.Tensor
+    test_features, test_labels = next(iter(test_dataloader))
+    img = test_labels[0]
+    print(img)
+
+
 def test():
 
     training_data = datasets.MNIST(
@@ -77,4 +92,4 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
+    test2()
