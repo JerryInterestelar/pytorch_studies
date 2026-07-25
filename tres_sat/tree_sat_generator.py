@@ -1,4 +1,5 @@
 import random
+
 import pandas as pd
 
 type Expression = list[dict[int, bool]]
