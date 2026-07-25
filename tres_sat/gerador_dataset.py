@@ -3,7 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 
 
-class TresSATDataset(Dataset):
+class TreeSATDataset(Dataset):
     def __init__(self, file: str) -> None:
         df = pd.read_csv(file)
         line = torch.tensor(df.values, dtype=torch.float32)
@@ -14,11 +14,11 @@ class TresSATDataset(Dataset):
         return len(self.x)
 
     def __getitem__(self, index):
-        return self.x[index], self.y[index]
+        return self.x[index], self.y[index].unsqueeze(0)
 
 
 if __name__ == "__main__":
-    dataset = TresSATDataset("tres_sat_dataset_8_10.csv")
+    dataset = TreeSATDataset("tres_sat_dataset_8_10.csv")
     dataloader = DataLoader(dataset, 64, shuffle=True)
     input, output = next(iter(dataloader))
-    print(input[0])
+    print(input[0].size(), output[0].unsqueeze(0).size())
