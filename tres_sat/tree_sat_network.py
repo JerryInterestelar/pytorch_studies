@@ -52,6 +52,32 @@ def train_tree_sat_network(
             print(f"Perda: {loss:>7f} [{current:>5d}/{size:>5d}]")
 
 
+def test_tree_sat_network(
+    dataloader: DataLoader[tuple[Tensor, Tensor]],
+    model: nn.Module,
+    loss_fn: nn.BCEWithLogitsLoss,
+):
+    model.eval()
+
+    dataset = cast(Sized, dataloader.dataset)
+    size = len(dataset)
+    num_batches = len(dataloader)
+    test_loss, correct = 0, 0
+
+    with torch.no_grad():
+        for X, y in dataloader:
+            pred = model(X)
+            test_loss += loss_fn(pred, y).item()
+            pred_classes = (pred >= 0.0).type(torch.float)
+            correct += (pred_classes == y).type(torch.float).sum().item()
+
+    test_loss /= num_batches
+    correct /= size
+    print(
+        f"Teste de erros: \n Acurácia: {(100 * correct):>0.1f}%, Perda média: {test_loss:>8f} \n"
+    )
+
+
 def main():
 
     learning_rate = 1e-3
@@ -72,6 +98,13 @@ def main():
             optimizer,
             batch_size,
         )
+
+    print("-" * 30)
+    test_tree_sat_network(
+        dataloader,
+        tree_sat_model,
+        loss_fn,
+    )
 
 
 if __name__ == "__main__":
