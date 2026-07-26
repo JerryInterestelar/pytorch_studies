@@ -112,7 +112,7 @@ def main():
         test_loop(test_dataloader, model, loss_fn)
 
     # Saving the model
-    torch.save(model.state_dict(), "basic_model_weights.pth")
+    torch.save(model.state_dict(), "./data/models/FashionMNIST_model_weights.pth")
     print("Pronto")
 
 

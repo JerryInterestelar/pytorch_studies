@@ -2,9 +2,9 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from tres_sat.dataset_generator import TreeSATDataset
-from core.engine import train_loop, test_loop
+from core.engine import test_loop, train_loop
 from core.metrics import binary_accuracy
+from tree_sat.dataset_generator import TreeSATDataset
 
 
 class TreeSATNetwork(nn.Module):
@@ -28,12 +28,14 @@ class TreeSATNetwork(nn.Module):
 
 def main():
 
+    save_model = True
     learning_rate = 1e-3
     batch_size = 16
     epochs = 100
+    input_n = 8
     dataset = TreeSATDataset("./data/datasets/tres_sat_dataset_8_10.csv")
     dataloader = DataLoader(dataset, batch_size, shuffle=True)
-    tree_sat_model = TreeSATNetwork(8, 1)
+    tree_sat_model = TreeSATNetwork(input_n, 1)
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(tree_sat_model.parameters(), lr=learning_rate)
 
@@ -49,6 +51,11 @@ def main():
 
     print("-" * 30)
     test_loop(dataloader, tree_sat_model, loss_fn, binary_accuracy)
+    if save_model:
+        file_path = f"./data/models/tree_sat_model_{input_n}x1_weights.pth"
+
+        torch.save(tree_sat_model.state_dict(), file_path)
+        print(f"Modelo Salvo em {file_path}")
 
 
 if __name__ == "__main__":
