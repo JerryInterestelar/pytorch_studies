@@ -2,38 +2,39 @@ import random
 
 import pandas as pd
 
-type Expression = list[dict[int, bool]]
+type Expression = list[tuple[tuple[int, int], ...]]
 
 
-def generate_variables(n_variables: int) -> dict[int, bool]:
-    return {i: random.choice([True, False]) for i in range(n_variables)}
+def generate_random_variables(n_variables: int) -> list[int]:
+    return [int(random.choice([True, False])) for i in range(n_variables)]
 
 
 def tree_sat_expression(n_variables: int, n_clauses: int) -> Expression:
-    clauses: Expression = []
+    clauses = set()
 
-    for _ in range(n_clauses):
+    while len(clauses) < n_clauses:
         indices_trio = sorted(random.sample(range(n_variables), 3))
-        clauses.append({i: random.choice([True, False]) for i in indices_trio})
+        clause = [tuple([i, random.choice([0, 1])]) for i in indices_trio]
 
-    return clauses
+        clauses.add(tuple(clause))
+    return list(clauses)
 
 
-def eval_tree_sat(variables: dict[int, bool], expression: Expression) -> bool:
+def eval_tree_sat(variables: list[int], expression: Expression) -> int:
     analyzed_clauses = []
     for clause in expression:
         analyzed_variables = [
-            variables[i] if value else not variables[i] for i, value in clause.items()
+            variables[i] if value else not variables[i] for i, value in clause
         ]
         analyzed_clauses.append(any(analyzed_variables))
-    return all(analyzed_clauses)
+    return int(all(analyzed_clauses))
 
 
 def print_expression(expression: Expression) -> None:
     formatted_clauses = []
 
     for clause in expression:
-        literals = [f"x{i}" if v else f"!x{i}" for i, v in clause.items()]
+        literals = [f"x{i}" if v else f"!x{i}" for i, v in clause]
 
         formatted_clauses.append(f"({' or '.join(literals)})")
 
@@ -41,19 +42,36 @@ def print_expression(expression: Expression) -> None:
     print(expression_string)
 
 
-def generate_dataset(n_variables: int, n_clauses: int, file_name: str):
+def generate_datasets(
+    n_variables: int, n_clauses: int, train_file_name: str, test_file_name: str
+):
     tree_sat_list = tree_sat_expression(n_variables, n_clauses)
     print_expression(tree_sat_list)
-    lines = []
-    for _ in range(1000):
-        x = generate_variables(n_variables)
-        line = [1 if value else 0 for value in x.values()]
-        line.append(1 if eval_tree_sat(x, tree_sat_list) else 0)
-        lines.append(line)
-    df = pd.DataFrame(lines)
-    print(df)
-    df.to_csv(file_name, index=False, header=True)
+
+    unique_cases = set()
+
+    while len(unique_cases) < 1200:
+        variables = random.choices([0, 1], k=n_variables)
+        unique_cases.add(tuple(variables))
+    full_lines = []
+    for line in unique_cases:
+        list_line = list(line)
+        list_line.append(eval_tree_sat(list_line, tree_sat_list))
+        full_lines.append(list_line)
+
+    df = pd.DataFrame(full_lines)
+
+    df[:1000].to_csv(train_file_name, index=False, header=False)
+    df[1000:].to_csv(test_file_name, index=False, header=False)
 
 
 if __name__ == "__main__":
-    generate_dataset(8, 10, "tres_sat_dataset_8_10.csv")
+    n_variables = 60
+    generate_datasets(
+        n_variables,
+        10,
+        f"./data/datasets/train_tree_sat_dataset_{n_variables}_10.csv",
+        f"./data/datasets/test_tree_sat_dataset_{n_variables}_10.csv",
+    )
+    # generate_dataset(43, 10, "./data/datasets/tres_sat_dataset_43_10.csv")
+    # generate_dataset(60, 10, "./data/datasets/tres_sat_dataset_60_10.csv")
