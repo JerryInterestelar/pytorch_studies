@@ -12,13 +12,13 @@ class TreeSATNetwork(nn.Module):
         super().__init__()
         self.linear_relu_layers = nn.Sequential(
             # Camada de input -> Camada Escondida 1
-            nn.Linear(n_inputs, 16),
+            nn.Linear(n_inputs, n_inputs * 2),
             nn.ReLU(),
             # Camada Escondida 1 -> Camada Escondida 2
-            nn.Linear(16, 8),
+            nn.Linear(n_inputs * 2, n_inputs),
             nn.ReLU(),
             # Camada Escondida 2 -> Camada de output
-            nn.Linear(8, n_outputs),
+            nn.Linear(n_inputs, n_outputs),
         )
 
     def forward(self, x):
@@ -32,17 +32,24 @@ def main():
     learning_rate = 1e-3
     batch_size = 16
     epochs = 100
-    input_n = 8
-    dataset = TreeSATDataset("./data/datasets/tres_sat_dataset_8_10.csv")
-    dataloader = DataLoader(dataset, batch_size, shuffle=True)
-    tree_sat_model = TreeSATNetwork(input_n, 1)
+    n_inputs = 10
+    n_clauses = 43
+    train_dataset = TreeSATDataset(
+        f"./data/datasets/train_tree_sat_dataset_{n_inputs}_{n_clauses}.csv"
+    )
+    train_dataloader = DataLoader(train_dataset, batch_size, shuffle=True)
+    test_dataset = TreeSATDataset(
+        f"./data/datasets/test_tree_sat_dataset_{n_inputs}_{n_clauses}.csv"
+    )
+    test_dataloader = DataLoader(test_dataset, batch_size, shuffle=True)
+    tree_sat_model = TreeSATNetwork(n_inputs, 1)
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(tree_sat_model.parameters(), lr=learning_rate)
 
     for t in range(epochs):
         print(f"Iteração {t} -----------------")
         train_loop(
-            dataloader,
+            train_dataloader,
             tree_sat_model,
             loss_fn,
             optimizer,
@@ -50,9 +57,9 @@ def main():
         )
 
     print("-" * 30)
-    test_loop(dataloader, tree_sat_model, loss_fn, binary_accuracy)
+    test_loop(test_dataloader, tree_sat_model, loss_fn, binary_accuracy)
     if save_model:
-        file_path = f"./data/models/tree_sat_model_{input_n}x1_weights.pth"
+        file_path = f"./data/models/tree_sat_model_{n_inputs}x{n_clauses}_weights.pth"
 
         torch.save(tree_sat_model.state_dict(), file_path)
         print(f"Modelo Salvo em {file_path}")

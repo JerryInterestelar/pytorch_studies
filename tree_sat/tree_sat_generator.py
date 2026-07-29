@@ -1,4 +1,5 @@
 import random
+from itertools import product
 
 import pandas as pd
 
@@ -42,7 +43,7 @@ def print_expression(expression: Expression) -> None:
     print(expression_string)
 
 
-def generate_datasets(
+def generate_datasets_20_plus(
     n_variables: int, n_clauses: int, train_file_name: str, test_file_name: str
 ):
     tree_sat_list = tree_sat_expression(n_variables, n_clauses)
@@ -65,13 +66,35 @@ def generate_datasets(
     df[1000:].to_csv(test_file_name, index=False, header=False)
 
 
+def generate_datasets_20_less(
+    n_variables: int, n_clauses: int, train_file_name: str, test_file_name: str
+):
+    tree_sat_list = tree_sat_expression(n_variables, n_clauses)
+    print_expression(tree_sat_list)
+
+    unique_cases = list(product([0, 1], repeat=n_variables))
+    random.shuffle(unique_cases)
+
+    full_lines = []
+    for line in unique_cases:
+        list_line = list(line)
+        list_line.append(eval_tree_sat(list_line, tree_sat_list))
+        full_lines.append(list_line)
+
+    df = pd.DataFrame(full_lines)
+
+    df[:800].to_csv(train_file_name, index=False, header=False)
+    df[800:].to_csv(test_file_name, index=False, header=False)
+
+
 if __name__ == "__main__":
-    n_variables = 60
-    generate_datasets(
+    n_variables = 10
+    n_clauses = 60
+    generate_datasets_20_less(
         n_variables,
-        10,
-        f"./data/datasets/train_tree_sat_dataset_{n_variables}_10.csv",
-        f"./data/datasets/test_tree_sat_dataset_{n_variables}_10.csv",
+        n_clauses,
+        f"./data/datasets/train_tree_sat_dataset_{n_variables}_{n_clauses}.csv",
+        f"./data/datasets/test_tree_sat_dataset_{n_variables}_{n_clauses}.csv",
     )
     # generate_dataset(43, 10, "./data/datasets/tres_sat_dataset_43_10.csv")
     # generate_dataset(60, 10, "./data/datasets/tres_sat_dataset_60_10.csv")
