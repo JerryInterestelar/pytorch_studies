@@ -6,7 +6,7 @@ from tree_sat.dataset_generator import TreeSATDataset
 from core.metrics import binary_accuracy
 
 n_input = 10
-n_clauses = 43
+n_clauses = 60
 
 tree_sat_dataset = TreeSATDataset(
     f"./data/datasets/test_tree_sat_dataset_{n_input}_{n_clauses}.csv"

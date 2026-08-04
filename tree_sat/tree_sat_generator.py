@@ -82,14 +82,14 @@ def generate_datasets_20_less(
         full_lines.append(list_line)
 
     df = pd.DataFrame(full_lines)
-
+    print(f"Incidência de valores 1 e 0: {df.iloc[:, -1].value_counts()}")
     df[:800].to_csv(train_file_name, index=False, header=False)
     df[800:].to_csv(test_file_name, index=False, header=False)
 
 
 if __name__ == "__main__":
     n_variables = 10
-    n_clauses = 60
+    n_clauses = 20
     generate_datasets_20_less(
         n_variables,
         n_clauses,
