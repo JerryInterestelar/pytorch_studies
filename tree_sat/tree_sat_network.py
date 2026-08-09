@@ -33,12 +33,12 @@ def main():
     batch_size = 16
     epochs = 100
     n_inputs = 10
-    n_clauses = 43
-    train_dataset = TreeSATDataset(
+    n_clauses = 5
+    train_dataset = TreeSATDataset.from_csv(
         f"./data/datasets/train_tree_sat_dataset_{n_inputs}_{n_clauses}.csv"
     )
     train_dataloader = DataLoader(train_dataset, batch_size, shuffle=True)
-    test_dataset = TreeSATDataset(
+    test_dataset = TreeSATDataset.from_csv(
         f"./data/datasets/test_tree_sat_dataset_{n_inputs}_{n_clauses}.csv"
     )
     test_dataloader = DataLoader(test_dataset, batch_size, shuffle=True)

@@ -43,34 +43,26 @@ def print_expression(expression: Expression) -> None:
     print(expression_string)
 
 
-def generate_datasets_20_plus(
-    n_variables: int, n_clauses: int, train_file_name: str, test_file_name: str
-):
+def generate_datasets_20_plus(n_variables: int, n_clauses: int) -> list[list[int]]:
     tree_sat_list = tree_sat_expression(n_variables, n_clauses)
-    print_expression(tree_sat_list)
+    # print_expression(tree_sat_list)
 
     unique_cases = set()
 
     while len(unique_cases) < 1200:
         variables = random.choices([0, 1], k=n_variables)
         unique_cases.add(tuple(variables))
-    full_lines = []
+    full_lines: list[list[int]] = []
     for line in unique_cases:
         list_line = list(line)
         list_line.append(eval_tree_sat(list_line, tree_sat_list))
         full_lines.append(list_line)
-
-    df = pd.DataFrame(full_lines)
-
-    df[:1000].to_csv(train_file_name, index=False, header=False)
-    df[1000:].to_csv(test_file_name, index=False, header=False)
+    return full_lines
 
 
-def generate_datasets_20_less(
-    n_variables: int, n_clauses: int, train_file_name: str, test_file_name: str
-):
+def generate_datasets_20_less(n_variables: int, n_clauses: int) -> list[list[int]]:
     tree_sat_list = tree_sat_expression(n_variables, n_clauses)
-    print_expression(tree_sat_list)
+    # print_expression(tree_sat_list)
 
     unique_cases = list(product([0, 1], repeat=n_variables))
     random.shuffle(unique_cases)
@@ -80,19 +72,28 @@ def generate_datasets_20_less(
         list_line = list(line)
         list_line.append(eval_tree_sat(list_line, tree_sat_list))
         full_lines.append(list_line)
+    return full_lines
 
-    df = pd.DataFrame(full_lines)
+
+def save_to_csv(
+    lines: list, slice_point: int, train_file_name: str, test_file_name: str
+):
+    df = pd.DataFrame(lines)
     print(f"Incidência de valores 1 e 0: {df.iloc[:, -1].value_counts()}")
-    df[:800].to_csv(train_file_name, index=False, header=False)
-    df[800:].to_csv(test_file_name, index=False, header=False)
+    df[:slice_point].to_csv(train_file_name, index=False, header=False)
+    df[slice_point:].to_csv(test_file_name, index=False, header=False)
+    print(f"CSVs salvos em {train_file_name} e {test_file_name}")
 
 
 if __name__ == "__main__":
     n_variables = 10
-    n_clauses = 20
-    generate_datasets_20_less(
-        n_variables,
-        n_clauses,
+    n_clauses = 5
+    save_to_csv(
+        generate_datasets_20_less(
+            n_variables,
+            n_clauses,
+        ),
+        800,
         f"./data/datasets/train_tree_sat_dataset_{n_variables}_{n_clauses}.csv",
         f"./data/datasets/test_tree_sat_dataset_{n_variables}_{n_clauses}.csv",
     )
