@@ -32,8 +32,8 @@ def main():
     learning_rate = 1e-3
     batch_size = 16
     epochs = 100
-    n_inputs = 10
-    n_clauses = 5
+    n_inputs = 100
+    n_clauses = 50
     train_dataset = TreeSATDataset.from_csv(
         f"./data/datasets/train_tree_sat_dataset_{n_inputs}_{n_clauses}.csv"
     )

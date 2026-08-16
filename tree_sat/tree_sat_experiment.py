@@ -25,7 +25,7 @@ def load_model(
     n_input: int,
     n_clauses: int,
 ) -> TreeSATNetwork:
-    print(f"1 - Carregando o modelo {n_input}X{n_clauses} treinado com uma fórmula X")
+    print(f"* Carregando o modelo {n_input}X{n_clauses} treinado com uma fórmula X")
     TREE_SAT_MODEL_FILE = (
         f"./data/models/tree_sat_model_{n_input}x{n_clauses}_weights.pth"
     )
@@ -37,28 +37,28 @@ def load_model(
 
 
 def test_new_input_and_formula_dataset():
-    n_input = 10
-    n_clauses = 5
+    n_input = 100
+    n_clauses = 50
 
     model = load_model(n_input, n_clauses)
 
-    print("2 - Testando a acurária com o dataset de que treinou a rede com a fórmula X")
+    print("* Testando a acurária com o dataset de que treinou a rede com a fórmula X")
     model_dataset = TreeSATDataset.from_csv(
         f"./data/datasets/train_tree_sat_dataset_{n_input}_{n_clauses}.csv"
     )
 
     print("Fazendo o eval na rede e analizando a acurária")
     print(
-        f"FORMULA X - A acurária do dataset de {n_input} inputs para o seu modelo treinado com {n_clauses} cláusulas é de: {100 * eval_tree_sat_input(model_dataset, model)}%"
+        f"FORMULA X - A acurária do dataset de {n_input} inputs para o seu modelo treinado com {n_clauses} cláusulas é de: \033[34m{100 * eval_tree_sat_input(model_dataset, model)}%\033[0m"
     )
 
-    print("3 - Testando a acurária com o dataset novo com uma fórmula Y")
+    print("* Testando a acurária com o dataset novo com uma fórmula Y")
     print(f"Gerando um novo dataset {n_input}X{n_clauses} com uma fórmula Y aleatória")
     new_formula_dataset = TreeSATDataset(generate_datasets_20_less(n_input, n_clauses))
 
     print("Fazendo o eval na rede e gerando a acurária")
     print(
-        f"FORMULA Y - A acurária do dataset de {n_input} inputs para o seu modelo treinado com {n_clauses} cláusulas é de: {100 * eval_tree_sat_input(new_formula_dataset, model)}%"
+        f"FORMULA Y - A acurária do dataset de {n_input} inputs para o seu modelo treinado com {n_clauses} cláusulas é de: \033[34m{100 * eval_tree_sat_input(new_formula_dataset, model)}%\033[0m"
     )
 
 

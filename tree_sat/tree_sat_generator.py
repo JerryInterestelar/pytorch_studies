@@ -86,10 +86,10 @@ def save_to_csv(
 
 
 if __name__ == "__main__":
-    n_variables = 10
-    n_clauses = 5
+    n_variables = 100
+    n_clauses = 50
     save_to_csv(
-        generate_datasets_20_less(
+        generate_datasets_20_plus(
             n_variables,
             n_clauses,
         ),
