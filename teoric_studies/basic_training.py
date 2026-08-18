@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 def treinamento(conjunto: list[tuple[int, int, int]]):
-    delta = 1e-2
+    delta = 1e-3
     w_1 = random.random()
     w_2 = random.random()
 
@@ -24,9 +24,10 @@ def treinamento(conjunto: list[tuple[int, int, int]]):
 
             d_w_1 = -(T - R) * x_1
             d_w_2 = -(T - R) * x_2
-        # Aprendizado
-        w_1 -= delta * d_w_1
-        w_2 -= delta * d_w_2
+            # Aprendizado
+            w_1 -= delta * d_w_1
+            w_2 -= delta * d_w_2
+
         epoca += 1
         # print(epoca)
         if epoca % 100 == 0:
@@ -39,6 +40,11 @@ def treinamento(conjunto: list[tuple[int, int, int]]):
 if __name__ == "__main__":
     conjunto = [(0, 0, 0), (0, 1, 1), (1, 0, 1), (1, 1, 0)]
     pesos = treinamento(conjunto)
+
+    for x1, x2, _ in conjunto:
+        resultado = x1 * pesos[-1][0] + x2 * pesos[-1][1]
+        print(f"{x1}\t{x2}\t{x1 ^ x2}\t{resultado}")
+
     epocas = list(range(0, 1000, 100))
     _, ax = plt.subplots()
     ax.plot(epocas, pesos[0], label="w_1")
