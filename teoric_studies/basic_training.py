@@ -13,7 +13,7 @@ def sigmoid(x: float) -> float:
 
 
 def treinamento(conjunto: list[tuple[int, int, int]]):
-    delta = 0.5
+    delta = 0.1
     wa = random.random()
     wb = random.random()
     w1 = random.random()
@@ -27,7 +27,7 @@ def treinamento(conjunto: list[tuple[int, int, int]]):
 
     while epoca < 1000:
         dw1, dw2 = 0, 0
-        random.shuffle(conjunto)
+        # random.shuffle(conjunto)
         for linha in conjunto:
             x1, x2, T = linha
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     for x1, x2, _ in conjunto:
         resultado = x1 * pesos[-1][0] + x2 * pesos[-1][1]
-        print(f"{x1}\t{x2}\t{x1 ^ x2}\t{resultado}")
+        print(f"{x1}\t{x2}\t{x1 or x2}\t{resultado}")
 
     epocas = list(range(0, 1000, 100))
     _, ax = plt.subplots()
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     ax.set(
         xlabel="epocas",
         ylabel="valor dos pesos",
-        title="Valor dos pesos conforme as epocas",
+        title="Valor dos pesos conforme as epocas - OR Modificado",
     )
     ax.grid()
     plt.legend()
