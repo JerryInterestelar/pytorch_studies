@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 
 
 def dsigmoid(x: float) -> float:
-    f = sigmoid(x)
-    return f * (1 - f)
+    return x * (1.0 - x)
 
 
 def sigmoid(x: float) -> float:
@@ -13,71 +12,63 @@ def sigmoid(x: float) -> float:
 
 
 def treinamento(conjunto: list[tuple[int, int, int]]):
-    delta = 0.1
-    wa = random.random()
-    wb = random.random()
-    w1 = random.random()
-    w2 = random.random()
+    delta = 0.01
+    n_pesos = 6
+    w = [random.uniform(-0.5, 0.5) for _ in range(n_pesos)]
+    d = [0.0 for _ in range(n_pesos)]
 
-    wa_samples = []
-    wb_samples = []
-    w1_samples = []
-    w2_samples = []
+    w_samples = [list() for _ in range(n_pesos)]
+
     epoca = 0
 
     while epoca < 1000:
-        dw1, dw2 = 0, 0
-        # random.shuffle(conjunto)
         for linha in conjunto:
             x1, x2, T = linha
 
             # Propagação
-            n1 = x1 * w1 + x2 * w2
-            n2 = n1 * wa + 1 * wb
-            R = sigmoid(n2)
+            s1 = x1 * w[0] + x2 * w[2]
+            s2 = x1 * w[1] + x2 * w[3]
+            s3 = s1 * w[4] + s2 * w[5]
 
-            # Retro propagação
+            # retro Propagação
+            erro = -(T - s3)
+            d[5] = erro * s2
+            d[4] = erro * s1
 
-            erro = -(T - R)
-            dwa = erro * dsigmoid(n2) * n1
-            dwb = erro * dsigmoid(n2)
-            dw1 = erro * dsigmoid(n2) * wa * x1
-            dw2 = erro * dsigmoid(n2) * wa * x2
-            # Aprendizado
-            wa -= delta * dwa
-            wb -= delta * dwb
-            w1 -= delta * dw1
-            w2 -= delta * dw2
+            d[3] = erro * w[5] * x2
+            d[2] = erro * w[4] * x2
+            d[1] = erro * w[5] * x1
+            d[0] = erro * w[4] * x1
 
-        epoca += 1
-        # print(epoca)
+            for i in range(len(w)):
+                w[i] -= delta * d[i]
         if epoca % 100 == 0:
-            # print(w1, w2)
-            wa_samples.append(wa)
-            wb_samples.append(wb)
-            w1_samples.append(w1)
-            w2_samples.append(w2)
-    return wa_samples, wb_samples, w1_samples, w2_samples
+            for i in range(len(w)):
+                w_samples[i].append(w[i])
+        epoca += 1
+    return w_samples
 
 
 if __name__ == "__main__":
     conjunto = [(0, 0, 1), (0, 1, 0), (1, 0, 0), (1, 1, 1)]
     pesos = treinamento(conjunto)
 
-    for x1, x2, _ in conjunto:
-        resultado = x1 * pesos[-1][0] + x2 * pesos[-1][1]
-        print(f"{x1}\t{x2}\t{x1 or x2}\t{resultado}")
+    pesos_finais = [peso[-1] for peso in pesos]
+
+    for x1, x2, y in conjunto:
+        s1 = x1 * pesos_finais[0] + x2 * pesos_finais[2]
+        s2 = x1 * pesos_finais[1] + x2 * pesos_finais[3]
+        s3 = s1 * pesos_finais[4] + s2 * pesos_finais[5]
+        print(f"{x1}\t{x2}\t{y}\t{s3}")
 
     epocas = list(range(0, 1000, 100))
     _, ax = plt.subplots()
-    ax.plot(epocas, pesos[0], label="wa")
-    ax.plot(epocas, pesos[1], label="wb")
-    ax.plot(epocas, pesos[2], label="w1")
-    ax.plot(epocas, pesos[3], label="w2")
+    for i, amostra in enumerate(pesos, 1):
+        ax.plot(epocas, amostra, label=f"w{i}")
     ax.set(
         xlabel="epocas",
         ylabel="valor dos pesos",
-        title="Valor dos pesos conforme as epocas - OR Modificado",
+        title="Valor dos pesos conforme as epocas - XNOR Modificado",
     )
     ax.grid()
     plt.legend()
