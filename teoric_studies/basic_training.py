@@ -55,6 +55,8 @@ if __name__ == "__main__":
 
     pesos_finais = [peso[-1] for peso in pesos]
 
+    operacao = "EQUIV"
+    print(f"Tabela verdade X resultado treinado: {operacao}")
     for x1, x2, y in conjunto:
         s1 = x1 * pesos_finais[0] + x2 * pesos_finais[2]
         s2 = x1 * pesos_finais[1] + x2 * pesos_finais[3]
