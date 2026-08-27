@@ -49,6 +49,22 @@ def get_graph_matrix(graph: np.ndarray) -> list[list]:
     return m
 
 
+def map_graph_edges(graph: dict, start, function):
+    seen = set()
+    operation_result = []
+
+    def dfs(node):
+        seen.add(start)
+        for neighbor in graph.get(node, []):
+            operation_result.append(function(node, neighbor))
+            if neighbor not in seen:
+                seen.add(node)
+                dfs(neighbor)
+
+    dfs(start)
+    return operation_result
+
+
 def find_path(graph: dict, start, end, path=[]):
     """
     https://www.python.org/doc/essays/graphs/
