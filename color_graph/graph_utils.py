@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
+from color_graph.color_utils import get_colors
+
 
 GraphStructure = dict[Any, list[Any]]
 
@@ -15,10 +17,19 @@ class Graph:
         self._colors = colors
 
     @classmethod
-    def random(cls, n: int) -> Graph:
-        colors = random.choices(["red", "green", "blue", "pink", "purple"], k=n)
+    def random(cls, n: int, possible_colors: list | None = None) -> Graph | None:
+        if possible_colors:
+            chosen_colors = random.choices(possible_colors, k=n)
+        else:
+            if not (possible_colors := get_colors(3)):
+                print(
+                    "Muitas cores pedidas, use 'get_random_colors' ou adicione mais cores manualmente"
+                )
+                return
+
+            chosen_colors = random.choices(possible_colors, k=n)
         matrix = random_graph_matrix(n)
-        graph = cls(get_graph_dict(matrix), colors)
+        graph = cls(get_graph_dict(matrix), chosen_colors)
         return graph
 
     @property
@@ -36,6 +47,9 @@ class Graph:
     @property
     def as_ndarray_edge_list(self) -> np.ndarray:
         return get_graph_ndarray(self._nodes)
+
+    def set_colors(self, colors: list):
+        self._colors = colors
 
     def map_dfs_edges(self, start: Any, function: Callable[[Any, Any], Any]) -> list:
         return map_dfs_edges(self._nodes, start, function)
@@ -80,7 +94,9 @@ class Graph:
                 if isinstance(k, int) and k < len(self.colors)
                 else "Sem cor"
             )
-            lines.append(f"  {k} -> {values}: {cor}")
+            lines.append(
+                f"  {k} -> {values}: Cor({', '.join(f'{x:.2f}' for x in cor)})"
+            )
 
         return "\n".join(lines)
 
