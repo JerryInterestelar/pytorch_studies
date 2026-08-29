@@ -1,12 +1,13 @@
 import random
 import pandas as pd
 
-
 from color_graph.color_utils import get_colors
 from color_graph.graph_utils import Graph, GraphStructure
 
 
-def basic_graph(graph_dict: GraphStructure | None = None, colors: list | None = None):
+def basic_graph(
+    graph_dict: GraphStructure | None = None, colors: list | None = None
+) -> Graph:
     if graph_dict and colors:
         graph = Graph(graph_dict, colors)
     else:
@@ -23,25 +24,24 @@ def basic_graph(graph_dict: GraphStructure | None = None, colors: list | None = 
     result = graph.map_all_edges(compare_nodes)
     print("MESTRE" if not any(result) else "Grafo comum")
     graph.show()
+    return graph
 
 
 def gen_diferent_graph_colors(
-    graph: Graph | None, possible_colors: list | None, len: int
+    graph: Graph | None, possible_colors: list | None, size: int
 ) -> list[list]:
     assert graph
     assert possible_colors
     rows = []
-    for _ in range(len):
-        new_color = random.choices(possible_colors, k=n)
+    for _ in range(size):
+        new_color = random.choices(possible_colors, k=len(graph.nodes))
         graph.set_colors(new_color)
         result = graph.map_all_edges(lambda n, e: graph.colors[n] == graph.colors[e])
         rows.append([graph.colors, 1.0 if not any(result) else 0.0])
     return rows
 
 
-def save_to_csv(
-    rows: list, slice_point: int, train_file_name: str, test_file_name: str
-):
+def squeese_dataset(rows: list[list]) -> list[list]:
     data = []
     for colors, value in rows:
         line = []
@@ -49,7 +49,13 @@ def save_to_csv(
             line.extend([r, g, b])
         line.append(value)
         data.append(line)
+    return data
 
+
+def save_to_csv(
+    rows: list, slice_point: int, train_file_name: str, test_file_name: str
+):
+    data = squeese_dataset(rows)
     df = pd.DataFrame(data)
     print(f"Incidência de valores 1 e 0: {df.iloc[:, -1].value_counts()}")
     df[:slice_point].to_csv(train_file_name, index=False, header=False)
@@ -57,7 +63,7 @@ def save_to_csv(
     print(f"CSVs salvos em {train_file_name} e {test_file_name}")
 
 
-if __name__ == "__main__":
+def make_dataset():
     n = 5
     possible_colors = get_colors(4)
     graph = Graph.random(n, possible_colors)
@@ -67,3 +73,7 @@ if __name__ == "__main__":
         "./data/datasets/color_graph/train.csv",
         "./data/datasets/color_graph/test.csv",
     )
+
+
+if __name__ == "__main__":
+    make_dataset()
