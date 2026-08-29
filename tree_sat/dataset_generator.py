@@ -22,7 +22,9 @@ class TreeSATDataset(Dataset):
 
 
 if __name__ == "__main__":
-    dataset = TreeSATDataset.from_csv("./data/datasets/tres_sat_dataset_20_10.csv")
+    dataset = TreeSATDataset.from_csv(
+        "./data/datasets/tree_sat/test_tree_sat_dataset_10_5.csv"
+    )
     print(len(dataset))
     dataloader = DataLoader(dataset, 64, shuffle=True)
     input, output = next(iter(dataloader))

@@ -64,6 +64,6 @@ if __name__ == "__main__":
     save_to_csv(
         gen_diferent_graph_colors(graph, possible_colors, 1000),
         800,
-        "train.csv",
-        "test.csv",
+        "./data/datasets/color_graph/train.csv",
+        "./data/datasets/color_graph/test.csv",
     )

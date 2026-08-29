@@ -94,8 +94,8 @@ if __name__ == "__main__":
             n_clauses,
         ),
         800,
-        f"./data/datasets/train_tree_sat_dataset_{n_variables}_{n_clauses}.csv",
-        f"./data/datasets/test_tree_sat_dataset_{n_variables}_{n_clauses}.csv",
+        f"./data/datasets/tree_sat/train_tree_sat_dataset_{n_variables}_{n_clauses}.csv",
+        f"./data/datasets/tree_sat/test_tree_sat_dataset_{n_variables}_{n_clauses}.csv",
     )
     # generate_dataset(43, 10, "./data/datasets/tres_sat_dataset_43_10.csv")
     # generate_dataset(60, 10, "./data/datasets/tres_sat_dataset_60_10.csv")

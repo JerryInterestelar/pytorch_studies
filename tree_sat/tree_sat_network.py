@@ -59,7 +59,9 @@ def main():
     print("-" * 30)
     test_loop(test_dataloader, tree_sat_model, loss_fn, binary_accuracy)
     if save_model:
-        file_path = f"./data/models/tree_sat_model_{n_inputs}x{n_clauses}_weights.pth"
+        file_path = (
+            f"./data/models/tree_sat/tree_sat_model_{n_inputs}x{n_clauses}_weights.pth"
+        )
 
         torch.save(tree_sat_model.state_dict(), file_path)
         print(f"Modelo Salvo em {file_path}")

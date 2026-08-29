@@ -27,7 +27,7 @@ def load_model(
 ) -> TreeSATNetwork:
     print(f"* Carregando o modelo {n_input}X{n_clauses} treinado com uma fórmula X")
     TREE_SAT_MODEL_FILE = (
-        f"./data/models/tree_sat_model_{n_input}x{n_clauses}_weights.pth"
+        f"./data/models/tree_sat/tree_sat_model_{n_input}x{n_clauses}_weights.pth"
     )
     weights = torch.load(TREE_SAT_MODEL_FILE, weights_only=True)
 
