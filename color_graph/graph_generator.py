@@ -1,4 +1,5 @@
 import random
+
 import pandas as pd
 
 from color_graph.color_utils import get_colors

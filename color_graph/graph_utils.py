@@ -1,12 +1,11 @@
-from typing import Any, Callable
 import random
+from typing import Any, Callable
 
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
 from color_graph.color_utils import get_colors
-
 
 GraphStructure = dict[Any, list[Any]]
 
