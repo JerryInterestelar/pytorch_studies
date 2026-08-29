@@ -1,7 +1,96 @@
+from typing import Any, Callable
+import random
+
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
-from collections import defaultdict
 
 
+GraphStructure = dict[Any, list[Any]]
+
+
+class Graph:
+    def __init__(self, nodes: GraphStructure, colors: list) -> None:
+        self._nodes: GraphStructure = nodes
+        self._colors = colors
+
+    @classmethod
+    def random(cls, n: int) -> Graph:
+        colors = random.choices(["red", "green", "blue", "pink", "purple"], k=n)
+        matrix = random_graph_matrix(n)
+        graph = cls(get_graph_dict(matrix), colors)
+        return graph
+
+    @property
+    def nodes(self) -> GraphStructure:
+        return self._nodes
+
+    @property
+    def colors(self) -> list:
+        return self._colors
+
+    @property
+    def as_ndarray_matrix(self) -> np.ndarray:
+        return np.array(get_graph_matrix(self._nodes))
+
+    @property
+    def as_ndarray_edge_list(self) -> np.ndarray:
+        return get_graph_ndarray(self._nodes)
+
+    def map_dfs_edges(self, start: Any, function: Callable[[Any, Any], Any]) -> list:
+        return map_dfs_edges(self._nodes, start, function)
+
+    def map_all_edges(self, function: Callable[[Any, Any], Any]) -> list:
+        return map_all_edges(self._nodes, function)
+
+    def find_path(self, start: Any, end: Any) -> list | None:
+        path = []
+        return find_path(self._nodes, start, end, path)
+
+    def find_all_paths(self, start: Any, end: Any) -> list | None:
+        path = []
+        return find_all_paths(self._nodes, start, end, path)
+
+    def find_shortest_path(self, start: Any, end: Any):
+        path = []
+        return find_shortest_path(self._nodes, start, end, path)
+
+    def show(self):
+        G = nx.DiGraph(self._nodes)
+        plt.figure(figsize=(6, 6))
+        nx.draw(
+            G,
+            with_labels=True,
+            node_color=self._colors,
+            node_size=800,
+            font_color="white",
+            font_weight="bold",
+            arrowsize=20,
+        )
+        plt.show()
+
+    def __str__(self) -> str:
+        if not self.nodes:
+            return "Grafo Vazio"
+
+        lines = ["Graph:"]
+        for k, values in self.nodes.items():
+            cor = (
+                self.colors[k]
+                if isinstance(k, int) and k < len(self.colors)
+                else "Sem cor"
+            )
+            lines.append(f"  {k} -> {values}: {cor}")
+
+        return "\n".join(lines)
+
+    def __repr__(self) -> str:
+        num_nodes = len(self.nodes)
+        num_colors = len(self.colors)
+        return f"Graph(num_nodes={num_nodes}, num_colors={num_colors})"
+
+
+# implementado
 def random_graph_matrix(n: int) -> np.ndarray:
     if n > 100:
         print("Não foi testado para valores maiores que 100, tente valores menores")
@@ -11,6 +100,7 @@ def random_graph_matrix(n: int) -> np.ndarray:
     return random_matrix
 
 
+# nsei
 def random_graph_edge_list(n: int) -> np.ndarray:
     m = random_graph_matrix(n)
     u, v = [], []
@@ -23,14 +113,18 @@ def random_graph_edge_list(n: int) -> np.ndarray:
     return np.array([u, v])
 
 
-def get_graph_dict(graph: np.ndarray) -> dict:
-    dict_graph = defaultdict(list)
-    for u, v in graph.T.tolist():
-        dict_graph[u].append(v)
+# implementado
+def get_graph_dict(graph: np.ndarray) -> GraphStructure:
+    dict_graph = {i: [] for i in range(len(graph))}
+    for i, node in enumerate(graph.tolist()):
+        for j, link in enumerate(node):
+            if link != 0:
+                dict_graph[i].append(j)
     return dict(dict_graph)
 
 
-def get_graph_ndarray(graph: dict) -> np.ndarray:
+# implementado
+def get_graph_ndarray(graph: GraphStructure) -> np.ndarray:
     u, v = [], []
     for node, links in graph.items():
         for link in links:
@@ -39,22 +133,26 @@ def get_graph_ndarray(graph: dict) -> np.ndarray:
     return np.array([u, v])
 
 
-def get_graph_matrix(graph: np.ndarray) -> list[list]:
-    m = []
-    n = len(set(graph[0]))
-    for _ in range(n):
-        m.append([0] * n)
-    for n, e in graph.T.tolist():
-        m[n][e] = 1
+# implementado
+def get_graph_matrix(graph: GraphStructure) -> list[list]:
+    if not graph:
+        return []
+    n = max(graph.keys()) + 1
+    m = [[0] * n for _ in range(n)]
+    for k, values in graph.items():
+        for v in values:
+            m[k][v] = 1
     return m
 
 
-def map_graph_edges(graph: dict, start, function):
+def map_dfs_edges(
+    graph: GraphStructure, start: Any, function: Callable[[Any, Any], Any]
+) -> list:
     seen = set()
     operation_result = []
 
     def dfs(node):
-        seen.add(start)
+        seen.add(node)
         for neighbor in graph.get(node, []):
             operation_result.append(function(node, neighbor))
             if neighbor not in seen:
@@ -65,15 +163,24 @@ def map_graph_edges(graph: dict, start, function):
     return operation_result
 
 
-def find_path(graph: dict, start, end, path=[]):
+def map_all_edges(graph: GraphStructure, function: Callable[[Any, Any], Any]) -> list:
+    result = []
+    for node, neighbors in graph.items():
+        for neighbor in neighbors:
+            result.append(function(node, neighbor))
+    return result
+
+
+def find_path(graph: dict, start: Any, end: Any, path=None):
     """
     https://www.python.org/doc/essays/graphs/
     """
-
+    if not path:
+        path = []
     path = path + [start]
     if start == end:
         return path
-    if not graph[start]:
+    if not graph.get(start):
         return None
     for node in graph[start]:
         if node not in path:
@@ -83,15 +190,17 @@ def find_path(graph: dict, start, end, path=[]):
     return None
 
 
-def find_all_paths(graph: dict, start, end, path=[]):
+def find_all_paths(graph: dict, start: Any, end: Any, path=None):
     """
     https://www.python.org/doc/essays/graphs/
     """
 
+    if not path:
+        path = []
     path = path + [start]
     if start == end:
         return [path]
-    if not graph[start]:
+    if not graph.get(start):
         return []
     paths = []
     for node in graph[start]:
@@ -102,14 +211,16 @@ def find_all_paths(graph: dict, start, end, path=[]):
     return paths
 
 
-def find_shortest_path(graph: dict, start, end, path=[]):
+def find_shortest_path(graph: dict, start: Any, end: Any, path=None):
     """
     https://www.python.org/doc/essays/graphs/
     """
+    if not path:
+        path = []
     path = path + [start]
     if start == end:
         return path
-    if not graph[start]:
+    if not graph.get(start):
         return None
     shortest = None
     for node in graph[start]:
