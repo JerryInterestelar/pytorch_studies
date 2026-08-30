@@ -65,14 +65,15 @@ def save_to_csv(
 
 
 def make_dataset():
-    n = 5
-    possible_colors = get_colors(4)
-    graph = Graph.random(n, possible_colors)
+    n_nodes = 5
+    n_colors = 5
+    possible_colors = get_colors(n_colors)
+    graph = Graph.random(n_nodes, possible_colors)
     save_to_csv(
         gen_diferent_graph_colors(graph, possible_colors, 1000),
         800,
-        "./data/datasets/color_graph/train.csv",
-        "./data/datasets/color_graph/test.csv",
+        f"./data/datasets/color_graph/train_{n_nodes}_nodes_{n_colors}_colors.csv",
+        f"./data/datasets/color_graph/test_{n_nodes}_nodes_{n_colors}_colors.csv",
     )
 
 
