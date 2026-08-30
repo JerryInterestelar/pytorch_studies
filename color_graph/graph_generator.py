@@ -28,6 +28,7 @@ def basic_graph(
     return graph
 
 
+# TODO: revisar esse método aqui, acho que o número de cores pode estar meio estranho
 def gen_diferent_graph_colors(
     graph: Graph | None, possible_colors: list | None, size: int
 ) -> list[list]:
@@ -64,11 +65,19 @@ def save_to_csv(
     print(f"CSVs salvos em {train_file_name} e {test_file_name}")
 
 
-def make_dataset():
+def test():
     n_nodes = 5
     n_colors = 5
     possible_colors = get_colors(n_colors)
-    graph = Graph.random(n_nodes, possible_colors)
+    graph = Graph.random(n_nodes, 0.2, possible_colors)
+    print(gen_diferent_graph_colors(graph, possible_colors, 10))
+
+
+def make_dataset():
+    n_nodes = 5
+    n_colors = 6
+    possible_colors = get_colors(n_colors)
+    graph = Graph.random(n_nodes, 0.2, possible_colors)
     save_to_csv(
         gen_diferent_graph_colors(graph, possible_colors, 1000),
         800,

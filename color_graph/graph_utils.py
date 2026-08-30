@@ -16,7 +16,9 @@ class Graph:
         self._colors = colors
 
     @classmethod
-    def random(cls, n: int, possible_colors: list | None = None) -> Graph | None:
+    def random(
+        cls, n: int, p: float = 0.5, possible_colors: list | None = None
+    ) -> Graph | None:
         if possible_colors:
             chosen_colors = random.choices(possible_colors, k=n)
         else:
@@ -27,7 +29,7 @@ class Graph:
                 return
 
             chosen_colors = random.choices(possible_colors, k=n)
-        matrix = random_graph_matrix(n)
+        matrix = random_graph_matrix(n, p)
         graph = cls(get_graph_dict(matrix), chosen_colors)
         return graph
 
@@ -93,9 +95,8 @@ class Graph:
                 if isinstance(k, int) and k < len(self.colors)
                 else "Sem cor"
             )
-            lines.append(
-                f"  {k} -> {values}: Cor({', '.join(f'{x:.2f}' for x in cor)})"
-            )
+            # INFO: voltei a usar o format puro da tupla pra poder testar com cores em string, pode dar problema???
+            lines.append(f"  {k} -> {values}: Cor({cor})")
 
         return "\n".join(lines)
 
@@ -106,18 +107,19 @@ class Graph:
 
 
 # implementado
-def random_graph_matrix(n: int) -> np.ndarray:
+def random_graph_matrix(n: int, p: float) -> np.ndarray:
     if n > 100:
         print("Não foi testado para valores maiores que 100, tente valores menores")
         return np.array([[0]])
-    random_matrix = np.random.randint(2, size=(n, n))
+    random_matrix = (np.random.rand(n, n) < p).astype(int)
+
     np.fill_diagonal(random_matrix, 0)
     return random_matrix
 
 
 # nsei
-def random_graph_edge_list(n: int) -> np.ndarray:
-    m = random_graph_matrix(n)
+def random_graph_edge_list(n: int, p: float) -> np.ndarray:
+    m = random_graph_matrix(n, p)
     u, v = [], []
     for i, node in enumerate(m):
         for j, link in enumerate(node):

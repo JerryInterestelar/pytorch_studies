@@ -10,7 +10,7 @@ from color_graph.dataset_generator import ColorGraphDataset
 class ColorGraphNetwork(nn.Module):
     def __init__(self, n_inputs: int, n_outputs: int) -> None:
         super().__init__()
-        self.linear_relu_layers = nn.Sequential(
+        layers = [
             # Camada de input -> Camada Escondida 1
             nn.Linear(n_inputs, n_inputs * 2),
             nn.ReLU(),
@@ -19,7 +19,8 @@ class ColorGraphNetwork(nn.Module):
             nn.ReLU(),
             # Camada Escondida 2 -> Camada de output
             nn.Linear(n_inputs, n_outputs),
-        )
+        ]
+        self.linear_relu_layers = nn.Sequential(*layers)
 
     def forward(self, x):
         logits = self.linear_relu_layers(x)
@@ -33,7 +34,7 @@ def main():
     batch_size = 16
     epochs = 100
     n_nodes = 5
-    n_colors = 5
+    n_colors = 6
     train_dataset = ColorGraphDataset.from_csv(
         f"./data/datasets/color_graph/train_{n_nodes}_nodes_{n_colors}_colors.csv",
     )
