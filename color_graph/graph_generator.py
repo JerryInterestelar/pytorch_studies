@@ -1,21 +1,14 @@
-import random
-
 import pandas as pd
 
-from color_graph.color_utils import get_colors
-from color_graph.graph_utils import Graph, GraphStructure
+from color_graph.graph_utils import Graph, GraphStructure, get_color_set
 
 
-def basic_graph(
-    graph_dict: GraphStructure | None = None, colors: list | None = None
-) -> Graph:
-    if graph_dict and colors:
-        graph = Graph(graph_dict, colors)
+def basic_graph(graph_dict: GraphStructure | None = None) -> Graph:
+    if graph_dict:
+        graph = Graph(graph_dict)
     else:
-        graph = Graph.random(5)
+        graph = Graph.random(5, 0.4)
     print(graph)
-
-    assert graph
 
     def compare_nodes(node, neighbor):
         result = graph.colors[node] == graph.colors[neighbor]
@@ -28,17 +21,26 @@ def basic_graph(
     return graph
 
 
-def gen_diferent_graph_colors(
-    graph: Graph | None, possible_colors: list | None, size: int
-) -> list[list]:
-    assert graph
-    assert possible_colors
+def gen_color_dataset(graph: Graph, size: int) -> list[list]:
     rows = []
     for _ in range(size):
-        new_color = random.choices(possible_colors, k=len(graph.nodes))
+        new_color = get_color_set(len(graph.nodes))
         graph.set_colors(new_color)
+
         result = graph.map_all_edges(lambda n, e: graph.colors[n] == graph.colors[e])
-        rows.append([graph.colors, 1.0 if not any(result) else 0.0])
+
+        # WARN: Se a quantidade de cores vier a ser diferente um dia, mudar isso
+        coded_colors = []
+        for color in graph.colors:
+            match color:
+                case "red":
+                    coded_colors.append(-1.0)
+                case "green":
+                    coded_colors.append(0.0)
+                case "blue":
+                    coded_colors.append(1.0)
+
+        rows.append([coded_colors, 1.0 if not any(result) else 0.0])
     return rows
 
 
@@ -46,8 +48,8 @@ def squeese_dataset(rows: list[list]) -> list[list]:
     data = []
     for colors, value in rows:
         line = []
-        for r, g, b in colors:
-            line.extend([r, g, b])
+        for c in colors:
+            line.extend([c])
         line.append(value)
         data.append(line)
     return data
@@ -64,26 +66,16 @@ def save_to_csv(
     print(f"CSVs salvos em {train_file_name} e {test_file_name}")
 
 
-def test():
-    n_nodes = 5
-    n_colors = 5
-    possible_colors = get_colors(n_colors)
-    graph = Graph.random(n_nodes, 0.2, possible_colors)
-    print(gen_diferent_graph_colors(graph, possible_colors, 10))
-
-
 def make_dataset():
     n_nodes = 5
-    n_colors = 6
-    possible_colors = get_colors(n_colors)
-    graph = Graph.random(n_nodes, 0.2, possible_colors)
+    graph = Graph.random(n_nodes, 0.2)
     save_to_csv(
-        gen_diferent_graph_colors(graph, possible_colors, 1000),
+        gen_color_dataset(graph, 1000),
         800,
-        f"./data/datasets/color_graph/train_{n_nodes}_nodes_{n_colors}_colors.csv",
-        f"./data/datasets/color_graph/test_{n_nodes}_nodes_{n_colors}_colors.csv",
+        f"./data/datasets/color_graph/train_{n_nodes}_nodes.csv",
+        f"./data/datasets/color_graph/test_{n_nodes}_nodes.csv",
     )
 
 
 if __name__ == "__main__":
-    make_dataset()
+    print(gen_color_dataset(Graph.random(5, 0.3), 10))

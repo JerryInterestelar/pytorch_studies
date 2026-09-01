@@ -6,34 +6,28 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-from color_graph.color_utils import get_colors
 
 GraphStructure = dict[Any, list[Any]]
 
+POSSIBLE_COLORS = ["red", "green", "blue"]
+
+
+def get_color_set(n_colors: int) -> list[str]:
+    return random.choices(POSSIBLE_COLORS, k=n_colors)
+
 
 class Graph:
-    def __init__(self, nodes: GraphStructure, colors: list) -> None:
+    def __init__(self, nodes: GraphStructure) -> None:
         self._nodes: GraphStructure = nodes
-        self._colors = colors
+        self._colors = get_color_set(len(nodes))
 
     @classmethod
     def random(
         cls,
         n_nodes: int,
         edge_probability: float = 0.5,
-        possible_colors: list | None = None,
-    ) -> Graph | None:
-        if possible_colors:
-            chosen_colors = random.choices(possible_colors, k=n_nodes)
-        else:
-            if not (possible_colors := get_colors(3)):
-                print(
-                    "Muitas cores pedidas, use 'get_random_colors' ou adicione mais cores manualmente"
-                )
-                return
-
-            chosen_colors = random.choices(possible_colors, k=n_nodes)
-        graph = cls(random_ugraph(n_nodes, edge_probability), chosen_colors)
+    ) -> Graph:
+        graph = cls(random_ugraph(n_nodes, edge_probability))
         return graph
 
     @property
@@ -74,7 +68,7 @@ class Graph:
         return find_shortest_path(self._nodes, start, end, path)
 
     def show(self):
-        G = nx.DiGraph(self._nodes)
+        G = nx.Graph(self._nodes)
         plt.figure(figsize=(6, 6))
         nx.draw(
             G,
@@ -83,7 +77,7 @@ class Graph:
             node_size=800,
             font_color="white",
             font_weight="bold",
-            arrowsize=20,
+            # arrowsize=20,
         )
         plt.show()
 
@@ -93,12 +87,7 @@ class Graph:
 
         lines = ["Graph:"]
         for k, values in self.nodes.items():
-            cor = (
-                self.colors[k]
-                if isinstance(k, int) and k < len(self.colors)
-                else "Sem cor"
-            )
-            lines.append(f"  {k} -> {values}: Cor({cor})")
+            lines.append(f"  {k} -> {values}: Cor({self.colors[k]})")
 
         return "\n".join(lines)
 
@@ -112,8 +101,7 @@ def random_ugraph(n_nodes: int, edge_probability: float) -> GraphStructure:
 
     graph = {i: [] for i in range(n_nodes)}
 
-    unique_conections = tuple(combinations(graph.keys(), 2))
-    for i, j in unique_conections:
+    for i, j in combinations(graph.keys(), 2):
         if random.random() < edge_probability:
             graph[i].append(j)
             graph[j].append(i)

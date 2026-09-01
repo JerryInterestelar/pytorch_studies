@@ -29,21 +29,20 @@ class ColorGraphNetwork(nn.Module):
 
 def load_model(
     n_nodes: int,
-    n_colors: int,
 ) -> ColorGraphNetwork:
-    print(
-        f"* Carregando o modelo {n_nodes} nos X {n_colors} cores treinado com grafo X"
+    print(f"* Carregando o modelo {n_nodes} nos treinado com grafo X")
+    COLOR_GRAPH_MODEL_FILE = (
+        f"./data/models/color_graph/color_graph_model_{n_nodes}_nodes.pth"
     )
-    COLOR_GRAPH_MODEL_FILE = f"./data/models/color_graph/color_graph_model_{n_nodes}_nodes_{n_colors}_colors.pth"
     weights = torch.load(COLOR_GRAPH_MODEL_FILE, weights_only=True)
 
-    model = ColorGraphNetwork(n_nodes * 3, 1)
+    model = ColorGraphNetwork(n_nodes, 1)
     model.load_state_dict(weights)
     return model
 
 
-def save_model(n_nodes: int, n_colors: int, model: ColorGraphNetwork):
-    file_path = f"./data/models/color_graph/color_graph_model_{n_nodes}_nodes_{n_colors}_colors.pth"
+def save_model(n_nodes: int, model: ColorGraphNetwork):
+    file_path = f"./data/models/color_graph/color_graph_model_{n_nodes}_nodes.pth"
 
     torch.save(model.state_dict(), file_path)
     print(f"Modelo Salvo em {file_path}")
@@ -60,7 +59,7 @@ def train_test_color_graph_model(
     train_dataloader = DataLoader(train_dataset, batch_size, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size, shuffle=True)
 
-    color_graph_model = ColorGraphNetwork(n_nodes * 3, 1)
+    color_graph_model = ColorGraphNetwork(n_nodes, 1)
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(color_graph_model.parameters(), lr=learning_rate)
 
