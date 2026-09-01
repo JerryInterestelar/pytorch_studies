@@ -1,3 +1,4 @@
+import random
 from typing import Any
 
 import pandas as pd
@@ -6,7 +7,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from color_graph.color_utils import get_colors
 from color_graph.graph_generator import gen_diferent_graph_colors, squeese_dataset
-from color_graph.graph_utils import Graph
+from color_graph.graph_utils import Graph, GraphStructure
 
 
 class ColorGraphDataset(Dataset):
@@ -30,6 +31,44 @@ class ColorGraphDataset(Dataset):
         return torch.unique(self.y, return_counts=True)
 
 
+def make_random_graph_dataset(
+    n_nodes: int,
+    n_possible_colors: int,
+    edge_probability: float,
+    sample_amount: int,
+    slice: int,
+) -> tuple[Graph, ColorGraphDataset, ColorGraphDataset]:
+    possible_colors = get_colors(n_possible_colors)
+    graph = Graph.random(n_nodes, edge_probability, possible_colors)
+    assert graph
+    raw_data = squeese_dataset(
+        gen_diferent_graph_colors(graph, possible_colors, sample_amount)
+    )
+    return (
+        graph,
+        ColorGraphDataset(raw_data[:slice]),
+        ColorGraphDataset(raw_data[slice:]),
+    )
+
+
+def make_dataset(
+    nodes: GraphStructure, n_possible_colors: int, sample_amount: int, slice: int
+) -> tuple[Graph, ColorGraphDataset, ColorGraphDataset]:
+    n_nodes = len(nodes)
+    possible_colors = get_colors(n_possible_colors)
+    assert possible_colors
+    graph = Graph(nodes, random.choices(possible_colors, k=n_nodes))
+    assert graph
+    raw_data = squeese_dataset(
+        gen_diferent_graph_colors(graph, possible_colors, sample_amount)
+    )
+    return (
+        graph,
+        ColorGraphDataset(raw_data[:slice]),
+        ColorGraphDataset(raw_data[slice:]),
+    )
+
+
 def test_load_csv():
     """
     Testa criar ler o dataset já criado em "graph_generator" e se o csv gerado encaixa na classe de dataset e dataloader
@@ -49,15 +88,10 @@ def test_load_from_processing():
     Testa criar um grafo de 5 nós, gerar <sample_amount> amostras para cores diferentes,
     por tudo na classe de dataset e dataloader
     """
-    n = 5
-    possible_colors = get_colors(4)
-    graph = Graph.random(n, 0.5, possible_colors)
-    sample_amount = 10
-    raw_data = squeese_dataset(
-        gen_diferent_graph_colors(graph, possible_colors, sample_amount)
+    _, dataset, _ = make_random_graph_dataset(
+        n_nodes=5, n_possible_colors=4, edge_probability=0.5, sample_amount=10, slice=8
     )
-    dataset = ColorGraphDataset(raw_data)
-    assert len(dataset) == sample_amount
+    assert len(dataset) == 8
     dataloader = DataLoader(dataset, 64, shuffle=True)
     input, output = next(iter(dataloader))
     assert list(input[0].size()) == [15]
@@ -66,5 +100,5 @@ def test_load_from_processing():
 
 
 if __name__ == "__main__":
-    test_load_csv()
+    test_load_csv()  # Falha se não tiver o arquivo
     test_load_from_processing()

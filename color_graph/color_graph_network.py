@@ -27,22 +27,39 @@ class ColorGraphNetwork(nn.Module):
         return logits
 
 
-def main():
+def load_model(
+    n_nodes: int,
+    n_colors: int,
+) -> ColorGraphNetwork:
+    print(
+        f"* Carregando o modelo {n_nodes} nos X {n_colors} cores treinado com grafo X"
+    )
+    COLOR_GRAPH_MODEL_FILE = f"./data/models/color_graph/color_graph_model_{n_nodes}_nodes_{n_colors}_colors.pth"
+    weights = torch.load(COLOR_GRAPH_MODEL_FILE, weights_only=True)
 
-    save_model = False
+    model = ColorGraphNetwork(n_nodes * 3, 1)
+    model.load_state_dict(weights)
+    return model
+
+
+def save_model(n_nodes: int, n_colors: int, model: ColorGraphNetwork):
+    file_path = f"./data/models/color_graph/color_graph_model_{n_nodes}_nodes_{n_colors}_colors.pth"
+
+    torch.save(model.state_dict(), file_path)
+    print(f"Modelo Salvo em {file_path}")
+
+
+def train_test_color_graph_model(
+    datasets: tuple[ColorGraphDataset, ColorGraphDataset], n_nodes: int
+) -> ColorGraphNetwork:
     learning_rate = 1e-3
     batch_size = 16
     epochs = 100
-    n_nodes = 5
-    n_colors = 6
-    train_dataset = ColorGraphDataset.from_csv(
-        f"./data/datasets/color_graph/train_{n_nodes}_nodes_{n_colors}_colors.csv",
-    )
+    train_dataset, test_dataset = datasets
+
     train_dataloader = DataLoader(train_dataset, batch_size, shuffle=True)
-    test_dataset = ColorGraphDataset.from_csv(
-        f"./data/datasets/color_graph/test_{n_nodes}_nodes_{n_colors}_colors.csv",
-    )
     test_dataloader = DataLoader(test_dataset, batch_size, shuffle=True)
+
     color_graph_model = ColorGraphNetwork(n_nodes * 3, 1)
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(color_graph_model.parameters(), lr=learning_rate)
@@ -59,12 +76,22 @@ def main():
 
     print("-" * 30)
     test_loop(test_dataloader, color_graph_model, loss_fn, binary_accuracy)
-    if save_model:
-        file_path = f"./data/models/color_graph/color_graph_model_{n_nodes}_nodes_{n_colors}_colors.pth"
+    return color_graph_model
 
-        torch.save(color_graph_model.state_dict(), file_path)
-        print(f"Modelo Salvo em {file_path}")
+
+def eval_color_graph_input(
+    data_set: ColorGraphDataset,
+    model: ColorGraphNetwork,
+):
+    model.eval()
+
+    accuracy = 0
+    with torch.no_grad():
+        for x, y in data_set:
+            prediction = model(x)
+            accuracy += binary_accuracy(prediction, y)
+    return accuracy / (len(data_set))
 
 
 if __name__ == "__main__":
-    main()
+    ...
