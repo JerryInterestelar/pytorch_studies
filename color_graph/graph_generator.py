@@ -28,7 +28,6 @@ def basic_graph(
     return graph
 
 
-# TODO: revisar esse método aqui, acho que o número de cores pode estar meio estranho
 def gen_diferent_graph_colors(
     graph: Graph | None, possible_colors: list | None, size: int
 ) -> list[list]:

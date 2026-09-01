@@ -26,6 +26,9 @@ class ColorGraphDataset(Dataset):
     def __getitem__(self, index):
         return self.x[index], self.y[index].unsqueeze(0)
 
+    def y_distribution(self):
+        return torch.unique(self.y, return_counts=True)
+
 
 def test_load_csv():
     """
@@ -48,7 +51,7 @@ def test_load_from_processing():
     """
     n = 5
     possible_colors = get_colors(4)
-    graph = Graph.random(n, possible_colors)
+    graph = Graph.random(n, 0.5, possible_colors)
     sample_amount = 10
     raw_data = squeese_dataset(
         gen_diferent_graph_colors(graph, possible_colors, sample_amount)

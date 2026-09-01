@@ -43,26 +43,26 @@ def main():
         f"./data/datasets/color_graph/test_{n_nodes}_nodes_{n_colors}_colors.csv",
     )
     test_dataloader = DataLoader(test_dataset, batch_size, shuffle=True)
-    tree_sat_model = ColorGraphNetwork(n_nodes * 3, 1)
+    color_graph_model = ColorGraphNetwork(n_nodes * 3, 1)
     loss_fn = nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adam(tree_sat_model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(color_graph_model.parameters(), lr=learning_rate)
 
     for t in range(epochs):
         print(f"Iteração {t} -----------------")
         train_loop(
             train_dataloader,
-            tree_sat_model,
+            color_graph_model,
             loss_fn,
             optimizer,
             batch_size,
         )
 
     print("-" * 30)
-    test_loop(test_dataloader, tree_sat_model, loss_fn, binary_accuracy)
+    test_loop(test_dataloader, color_graph_model, loss_fn, binary_accuracy)
     if save_model:
         file_path = f"./data/models/color_graph/color_graph_model_{n_nodes}_nodes_{n_colors}_colors.pth"
 
-        torch.save(tree_sat_model.state_dict(), file_path)
+        torch.save(color_graph_model.state_dict(), file_path)
         print(f"Modelo Salvo em {file_path}")
 
 
