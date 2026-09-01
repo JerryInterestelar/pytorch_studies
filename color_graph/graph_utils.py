@@ -1,4 +1,5 @@
 import random
+from itertools import combinations
 from typing import Any, Callable
 
 import matplotlib.pyplot as plt
@@ -17,10 +18,13 @@ class Graph:
 
     @classmethod
     def random(
-        cls, n: int, p: float = 0.5, possible_colors: list | None = None
+        cls,
+        n_nodes: int,
+        edge_probability: float = 0.5,
+        possible_colors: list | None = None,
     ) -> Graph | None:
         if possible_colors:
-            chosen_colors = random.choices(possible_colors, k=n)
+            chosen_colors = random.choices(possible_colors, k=n_nodes)
         else:
             if not (possible_colors := get_colors(3)):
                 print(
@@ -28,9 +32,8 @@ class Graph:
                 )
                 return
 
-            chosen_colors = random.choices(possible_colors, k=n)
-        matrix = random_graph_matrix(n, p)
-        graph = cls(get_graph_dict(matrix), chosen_colors)
+            chosen_colors = random.choices(possible_colors, k=n_nodes)
+        graph = cls(random_ugraph(n_nodes, edge_probability), chosen_colors)
         return graph
 
     @property
@@ -95,7 +98,6 @@ class Graph:
                 if isinstance(k, int) and k < len(self.colors)
                 else "Sem cor"
             )
-            # INFO: voltei a usar o format puro da tupla pra poder testar com cores em string, pode dar problema???
             lines.append(f"  {k} -> {values}: Cor({cor})")
 
         return "\n".join(lines)
@@ -104,6 +106,19 @@ class Graph:
         num_nodes = len(self.nodes)
         num_colors = len(self.colors)
         return f"Graph(num_nodes={num_nodes}, num_colors={num_colors})"
+
+
+def random_ugraph(n_nodes: int, edge_probability: float) -> GraphStructure:
+
+    graph = {i: [] for i in range(n_nodes)}
+
+    unique_conections = tuple(combinations(graph.keys(), 2))
+    for i, j in unique_conections:
+        if random.random() < edge_probability:
+            graph[i].append(j)
+            graph[j].append(i)
+
+    return graph
 
 
 # implementado
