@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from color_graph.graph_generator import gen_color_dataset, squeese_dataset
-from color_graph.graph_utils import Graph, GraphStructure
+from color_graph.graph_utils import Graph
 
 
 class ColorGraphDataset(Dataset):
@@ -25,32 +25,16 @@ class ColorGraphDataset(Dataset):
     def __getitem__(self, index):
         return self.x[index], self.y[index].unsqueeze(0)
 
-    def y_distribution(self):
-        return torch.unique(self.y, return_counts=True)
+    def y_distribution(self) -> dict[float, int]:
+        values, distribution = torch.unique(self.y, return_counts=True)
+        return {v: d for v, d in zip(values.tolist(), distribution.tolist())}
 
 
-def make_random_graph_dataset(
-    n_nodes: int,
-    edge_probability: float,
-    sample_amount: int,
-    slice: int,
-) -> tuple[Graph, ColorGraphDataset, ColorGraphDataset]:
-    graph = Graph.random(n_nodes, edge_probability)
+def make_torch_dataset(
+    graph: Graph, sample_amount: int, slice: int
+) -> tuple[ColorGraphDataset, ColorGraphDataset]:
     raw_data = squeese_dataset(gen_color_dataset(graph, sample_amount))
     return (
-        graph,
-        ColorGraphDataset(raw_data[:slice]),
-        ColorGraphDataset(raw_data[slice:]),
-    )
-
-
-def make_dataset(
-    nodes: GraphStructure, n_possible_colors: int, sample_amount: int, slice: int
-) -> tuple[Graph, ColorGraphDataset, ColorGraphDataset]:
-    graph = Graph(nodes)
-    raw_data = squeese_dataset(gen_color_dataset(graph, sample_amount))
-    return (
-        graph,
         ColorGraphDataset(raw_data[:slice]),
         ColorGraphDataset(raw_data[slice:]),
     )
@@ -75,9 +59,8 @@ def test_load_from_processing():
     Testa criar um grafo de 5 nós, gerar <sample_amount> amostras para cores diferentes,
     por tudo na classe de dataset e dataloader
     """
-    _, dataset, _ = make_random_graph_dataset(
-        n_nodes=5, edge_probability=0.5, sample_amount=10, slice=8
-    )
+    graph = Graph.random(5)
+    dataset, _ = make_torch_dataset(graph=graph, sample_amount=10, slice=8)
     assert len(dataset) == 8
     dataloader = DataLoader(dataset, 64, shuffle=True)
     input, output = next(iter(dataloader))
@@ -87,5 +70,14 @@ def test_load_from_processing():
 
 
 if __name__ == "__main__":
-    # test_load_csv()  # Falha se não tiver o arquivo
-    test_load_from_processing()
+    sample_datasets = 1000
+    dist_mean = {0: 0.0, 1: 0.0}
+    for _ in range(sample_datasets):
+        graph = Graph.random(5, 0.15)
+        dataset = ColorGraphDataset(squeese_dataset(gen_color_dataset(graph, 100)))
+        dist = dataset.y_distribution()
+        dist_mean[0] += dist.get(0.0, 0)
+        dist_mean[1] += dist.get(1.0, 0)
+    dist_mean[0] /= sample_datasets
+    dist_mean[1] /= sample_datasets
+    print(dist_mean)
