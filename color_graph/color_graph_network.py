@@ -2,9 +2,11 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
+from color_graph.dataset_generator import ColorGraphDataset
+from color_graph.graph_generator import gen_color_dataset, squeese_dataset
+from color_graph.graph_utils import Graph
 from core.engine import test_loop, train_loop
 from core.metrics import binary_accuracy
-from color_graph.dataset_generator import ColorGraphDataset
 
 
 class ColorGraphNetwork(nn.Module):
@@ -76,6 +78,21 @@ def train_test_color_graph_model(
     print("-" * 30)
     test_loop(test_dataloader, color_graph_model, loss_fn, binary_accuracy)
     return color_graph_model
+
+
+def single_example_analysis(graph: Graph, graph_model: ColorGraphNetwork):
+    n_samples = 100
+    print(
+        f"* Gerando um dataset simples de {n_samples} amostras para o calculo de acurácia"
+    )
+    graph_random_colors_dataset = ColorGraphDataset(
+        squeese_dataset(gen_color_dataset(graph, n_samples))
+    )
+    print(f"* Mostrando a acurácia para o grafo: {graph.nodes}")
+    accuracy = eval_color_graph_input(graph_random_colors_dataset, graph_model)
+    print(
+        f"A acurácia calculada para a avaliação das permutações de cores geradas pelo o dataset de {n_samples} amostras é de: {accuracy:.2f}%"
+    )
 
 
 def eval_color_graph_input(
