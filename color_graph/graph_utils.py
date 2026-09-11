@@ -9,11 +9,11 @@ import numpy as np
 
 GraphStructure = dict[Any, list[Any]]
 
-POSSIBLE_COLORS = ["red", "green", "blue"]
+POSSIBLE_COLORS = {"red": -1, "green": 0, "blue": 1}
 
 
 def get_color_set(n_colors: int) -> list[str]:
-    return random.choices(POSSIBLE_COLORS, k=n_colors)
+    return random.choices(list(POSSIBLE_COLORS.keys()), k=n_colors)
 
 
 class Graph:
@@ -47,6 +47,9 @@ class Graph:
         return get_graph_ndarray(self._nodes)
 
     def set_colors(self, colors: list):
+        if len(colors) != len(self.nodes):
+            print("Nova lista de cores de tamanho incompatível com o tamanho de nós")
+            return
         self._colors = colors
 
     def map_dfs_edges(self, start: Any, function: Callable[[Any, Any], Any]) -> list:

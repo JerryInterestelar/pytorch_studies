@@ -81,7 +81,7 @@ def train_test_color_graph_model(
 
 
 def single_example_analysis(graph: Graph, graph_model: ColorGraphNetwork):
-    n_samples = 100
+    n_samples = 1000
     print(
         f"* Gerando um dataset simples de {n_samples} amostras para o calculo de acurácia"
     )
@@ -91,7 +91,7 @@ def single_example_analysis(graph: Graph, graph_model: ColorGraphNetwork):
     print(f"* Mostrando a acurácia para o grafo: {graph.nodes}")
     accuracy = eval_color_graph_input(graph_random_colors_dataset, graph_model)
     print(
-        f"A acurácia calculada para a avaliação das permutações de cores geradas pelo o dataset de {n_samples} amostras é de: {accuracy:.2f}%"
+        f"A acurácia calculada para a avaliação das permutações de cores geradas pelo o dataset de {n_samples} amostras é de: {100 * accuracy:.2f}%"
     )
 
 

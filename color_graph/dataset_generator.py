@@ -4,7 +4,11 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from color_graph.graph_generator import gen_color_dataset, squeese_dataset
+from color_graph.graph_generator import (
+    gen_balanced_color_dataset,
+    gen_color_dataset,
+    squeese_dataset,
+)
 from color_graph.graph_utils import Graph
 
 
@@ -31,12 +35,16 @@ class ColorGraphDataset(Dataset):
 
 
 def make_torch_dataset(
-    graph: Graph, sample_amount: int, slice: int
-) -> tuple[ColorGraphDataset, ColorGraphDataset]:
-    raw_data = squeese_dataset(gen_color_dataset(graph, sample_amount))
+    graph: Graph,
+    sample_amount: int,
+    slice: int,
+) -> tuple[ColorGraphDataset, ColorGraphDataset, tuple]:
+    dataset_lists, real_dists = gen_balanced_color_dataset(graph, sample_amount)
+    raw_data = squeese_dataset(dataset_lists)
     return (
         ColorGraphDataset(raw_data[:slice]),
         ColorGraphDataset(raw_data[slice:]),
+        real_dists,
     )
 
 
@@ -60,7 +68,7 @@ def test_load_from_processing():
     por tudo na classe de dataset e dataloader
     """
     graph = Graph.random(5)
-    dataset, _ = make_torch_dataset(graph=graph, sample_amount=10, slice=8)
+    dataset, _, _ = make_torch_dataset(graph=graph, sample_amount=10, slice=8)
     assert len(dataset) == 8
     dataloader = DataLoader(dataset, 64, shuffle=True)
     input, output = next(iter(dataloader))
@@ -73,7 +81,7 @@ if __name__ == "__main__":
     sample_datasets = 1000
     dist_mean = {0: 0.0, 1: 0.0}
     for _ in range(sample_datasets):
-        graph = Graph.random(5, 0.15)
+        graph = Graph.random(5, 0.4)
         dataset = ColorGraphDataset(squeese_dataset(gen_color_dataset(graph, 100)))
         dist = dataset.y_distribution()
         dist_mean[0] += dist.get(0.0, 0)

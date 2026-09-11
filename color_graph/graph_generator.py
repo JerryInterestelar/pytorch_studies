@@ -1,6 +1,14 @@
+import random
+from itertools import product
+
 import pandas as pd
 
-from color_graph.graph_utils import Graph, GraphStructure, get_color_set
+from color_graph.graph_utils import (
+    Graph,
+    GraphStructure,
+    get_color_set,
+    POSSIBLE_COLORS,
+)
 
 
 def basic_graph(graph_dict: GraphStructure | None = None) -> Graph:
@@ -21,26 +29,58 @@ def basic_graph(graph_dict: GraphStructure | None = None) -> Graph:
     return graph
 
 
+def is_valid(graph: Graph) -> float:
+    result = graph.map_all_edges(lambda n, e: graph.colors[n] == graph.colors[e])
+    return 1.0 if not any(result) else 0.0
+
+
+def gen_balanced_color_dataset(graph: Graph, size: int) -> tuple[list[list], tuple]:
+    total_combinations = 3 ** len(graph.nodes)
+
+    COMB_LIMIT = 5_000_000
+
+    if total_combinations > COMB_LIMIT:
+        raise ValueError(
+            f"Muitas combinações. Um grafo de {len(graph.nodes)} nós e 3 cores "
+            f"geraria {total_combinations} combinações na memória, o que pode travar o computador."
+        )
+    color_combinations = product(
+        list(POSSIBLE_COLORS.values()), repeat=len(graph.nodes)
+    )
+
+    valid_colors = []
+    invalid_colors = []
+
+    for combination in color_combinations:
+        graph.set_colors(list(combination))
+        result = is_valid(graph)
+        if result:
+            valid_colors.append([list(combination), result])
+        else:
+            invalid_colors.append([list(combination), result])
+
+    valid_len = len(valid_colors)
+    invalid_len = len(invalid_colors)
+    if valid_len == 0:
+        raise ValueError("Não foi possivel gerar cores válidas")
+    if invalid_len == 0:
+        raise ValueError("Não foi possivel gerar cores inválidas")
+
+    valid_dataset = random.choices(valid_colors, k=round(size / 2))
+    invalid_dataset = random.choices(invalid_colors, k=round(size / 2))
+    dataset = valid_dataset + invalid_dataset
+    random.shuffle(dataset)
+    return dataset, (valid_len, invalid_len)
+
+
 def gen_color_dataset(graph: Graph, size: int) -> list[list]:
     rows = []
     for _ in range(size):
         new_color = get_color_set(len(graph.nodes))
         graph.set_colors(new_color)
 
-        result = graph.map_all_edges(lambda n, e: graph.colors[n] == graph.colors[e])
-
-        # WARN: Se a quantidade de cores vier a ser diferente um dia, mudar isso
-        coded_colors = []
-        for color in graph.colors:
-            match color:
-                case "red":
-                    coded_colors.append(-1.0)
-                case "green":
-                    coded_colors.append(0.0)
-                case "blue":
-                    coded_colors.append(1.0)
-
-        rows.append([coded_colors, 1.0 if not any(result) else 0.0])
+        coded_colors = [POSSIBLE_COLORS[color] for color in graph.colors]
+        rows.append([coded_colors, is_valid(graph)])
     return rows
 
 
@@ -78,4 +118,8 @@ def make_dataset():
 
 
 if __name__ == "__main__":
-    print(gen_color_dataset(Graph.random(5, 0.3), 10))
+    graph = Graph.random(5, 0.4)
+    # print(gen_color_dataset(graph, 10))
+    gen_balanced_color_dataset(graph, 100)
+
+    # graph.show()
