@@ -9,8 +9,8 @@ from color_graph.graph_utils import Graph
 
 
 def main():
-    graph = Graph.random(5, 0.4)
-    train_dataset, test_dataset, real_dists = make_torch_dataset(graph, 1000, 800)
+    graph = Graph.random(14, 0.1)
+    train_dataset, test_dataset, real_dists = make_torch_dataset(graph, 10000, 8000)
     model = train_test_color_graph_model(
         (train_dataset, test_dataset), len(graph.nodes)
     )

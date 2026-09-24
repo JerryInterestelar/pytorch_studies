@@ -20,7 +20,8 @@ def train_loop(
     model.train()
     for batch, (X, y) in enumerate(dataloader):
         # computar predição e perda
-        pred = model(X)
+        pred = model(X).squeeze()
+        y = y.squeeze().float()
         loss = loss_fn(pred, y)
 
         # Backpropagation
@@ -48,7 +49,8 @@ def test_loop(
 
     with torch.no_grad():
         for X, y in dataloader:
-            pred = model(X)
+            pred = model(X).squeeze()
+            y = y.squeeze().float()
             test_loss += loss_fn(pred, y).item()
             correct += metric_fn(pred, y)
 
