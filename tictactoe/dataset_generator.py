@@ -48,7 +48,7 @@ def test_load_from_processing():
     input, output = next(iter(dataloader))
     assert list(input[0].size()) == [9]
     assert list(output[0].unsqueeze(0).size()) == [1, 1]
-    print("Test 02 - OK")
+    print("Test 01 - OK")
 
 
 if __name__ == "__main__":

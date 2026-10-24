@@ -13,12 +13,12 @@ class TicTacToeNetwork(nn.Module):
         super().__init__()
         layers = [
             # Camada de input -> Camada Escondida 1
-            nn.Linear(n_inputs, n_inputs * 2),
+            nn.Linear(n_inputs, 20),
             nn.ReLU(),
             # Camada Escondida 1 -> Camada Escondida 2
-            nn.Linear(n_inputs * 2, n_inputs),
+            nn.Linear(20, n_inputs),
             nn.ReLU(),
-            # Camada Escondida 2 -> Camada de output
+            # Camada Escondida 3 -> Camada de output
             nn.Linear(n_inputs, n_outputs),
         ]
         self.linear_relu_layers = nn.Sequential(*layers)
